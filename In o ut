@@ -1,0 +1,5 @@
+server ut: karta
+server in: input (riktning)
+
+klient in: karta
+klient ut: input (riktning)
