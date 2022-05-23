@@ -5,7 +5,7 @@ from turtle import left, right
 print_lock = threading.Lock()
 print_lock2 = threading.Lock()
 
-
+# game shit
 class Player:
     def __init__(self, x, y, hp, atk):
         self.x = x
@@ -20,18 +20,39 @@ class Player:
         newY = self.y
 
         if direction == up:
-            newX += 1
-            
+            newY += 1
         elif direction == down:
-            pass
+            newY -= 1
         elif direction == right:
-            pass
+            newX += 1
         elif direction == left:
+            newX -= 1
+        
+        newSquare = checkSquare(newX, newY)
+        if newSquare == "wall":
             pass
-# metoden keyboard.read_key() väntar på input
-# whoseTurn ska vara funktionen som anropas när en knapp trycks
+        elif newSquare == " ":
+            mapArray[newY][newX] = "@"
+            mapArray[oldY][oldX] = " "
+        elif newSquare == "/":
+            mapArray[newY][newX] = "@"
+            mapArray[oldY][oldX] = " "
+            self.atk += 5
+        elif newSquare == "@":
+            pass # implementera funktion för att hantera attacker mellan spelare
+        mapArray[oldY][oldX] = " "
+        self.x = newX
+        self.y = newY
+# 7x7 varav 5x5 spelbart, koordinater skrivs mapArray[y][x]
 
-# 7x7
+#######
+#     #
+#     #
+#     #
+#     #
+#     #
+#######
+
 mapArray = [
     ["#","#","#","#","#","#","#"],
     ["#"," "," "," "," "," ","#"],
@@ -41,6 +62,19 @@ mapArray = [
     ["#"," "," "," "," "," ","#"],
     ["#","#","#","#","#","#","#"]]
 
+def checkSquare(x, y)
+    global mapArray
+    if mapArray[y][x] == "#":
+        return "wall"
+    elif mapArray[y][x] == " ":
+        return "floor"
+    elif mapArray[y][x] == "/":
+        return "weapon"
+    elif mapArray[y][x] == "@":
+        return "player"
+
+
+# server poop
 def threaded(c):
     while True:
         data = c.recv(1024)
@@ -69,7 +103,7 @@ def main():
         s.listen(5)
         print("Server started!")
     except:
-        print("abonenten kan inte svara just nu, vem är abonenteten?")
+        print("Abonenten du försöker nå, kan inte TA ditt samtal just nu.")
     while True:
         c, addr = s.accept()
         print_lock.acquire()
