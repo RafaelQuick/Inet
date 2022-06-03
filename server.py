@@ -62,7 +62,7 @@ mapArray = [
     ["#"," "," "," "," "," ","#"],
     ["#","#","#","#","#","#","#"]]
 
-def checkSquare(x, y)
+def checkSquare(x, y):
     global mapArray
     if mapArray[y][x] == "#":
         return "wall"
