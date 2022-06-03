@@ -49,35 +49,6 @@ class Player:
         elif newSquare == "powerup":
             mapArray[newY][newX] = "@"
             mapArray[oldY][oldX] = " "
-<<<<<<< Updated upstream
-            self.atk += 5
-        elif newSquare == "@":
-            pass # implementera funktion för att hantera attacker mellan spelare
-        mapArray[oldY][oldX] = " "
-        self.x = newX
-        self.y = newY
-# 7x7 varav 5x5 spelbart, koordinater skrivs mapArray[y][x]
-
-#######
-#     #
-#     #
-#     #
-#     #
-#     #
-#######
-
-mapArray = [
-    ["#","#","#","#","#","#","#"],
-    ["#"," "," "," "," "," ","#"],
-    ["#"," "," "," "," "," ","#"],
-    ["#"," "," "," "," "," ","#"],
-    ["#"," "," "," "," "," ","#"],
-    ["#"," "," "," "," "," ","#"],
-    ["#","#","#","#","#","#","#"]]
-
-def checkSquare(x, y):
-    global mapArray
-=======
             self.x = newX
             self.y = newY
             powerup(self)
@@ -122,7 +93,6 @@ def createPlayer(no):
     return player
 
 def checkSquare(x, y):
->>>>>>> Stashed changes
     if mapArray[y][x] == "#":
         return "wall"
     elif mapArray[y][x] == " ":
