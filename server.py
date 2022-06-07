@@ -69,7 +69,9 @@ def genMap():
                 innerMapArray.append(" ")
         mapArray.append(innerMapArray)
         innerMapArray = []
+    mapArray.append(f"Player 1: {10} hp        Player 2: {10} hp")
     mapArray.append("")
+    
 
 def genCoords():
     emptySpot = False
@@ -113,14 +115,15 @@ def powerup(player):
             player.hp += 3
         else: 
             player.hp = 10
-        msg = f"Player {str(player.no)} sips 3 units of good health juice!"
+        msg = f"Player {str(player.no)} chugs some good health juice!"
     elif seed == 2:
         player.hp -= 1
-        msg = f"Player {str(player.no)} stubs 1 of their toes..."
+        msg = f"Player {str(player.no)} stubs their toe..."
     elif seed == 3:
+        # moves the player a random distance in a random direction
         displace(player, 2, 6)
         msg = f"Player {str(player.no)} has been displaced!"
-    mapArray[-1] = msg
+    mapArray[no_y+1] = msg
 
 def displace(player, min_dist, max_dist):
     directionSeed = random.randint(0, 3)
@@ -139,14 +142,16 @@ def displace(player, min_dist, max_dist):
 def combat(attacker_no):
     if attacker_no == 1:
         player2.hp -= player1.atk
-        mapArray[-1] = f"player1 attacks player2 for {player1.atk} damage!"
+        mapArray[no_y+1] = f"player1 attacks player2 for {player1.atk} damage!"
+        mapArray[no_y] = f"Player 1: {player1.hp} hp        Player 2: {player2.hp} hp"
         if player2.hp == 0:
-            mapArray[-1] = f"___player1 kills their opponent and wins the game!!____"
+            mapArray[no_y+1] = f"___player1 kills their opponent and wins the game!!____"
     else:
         player1.hp -= player2.atk
-        mapArray[-1] = f"player2 attacks player1 for {player2.atk} damage!"
+        mapArray[no_y+1] = f"player2 attacks player1 for {player2.atk} damage!"
+        mapArray[no_y] = f"Player 1: {player1.hp} hp        Player 2: {player2.hp} hp"
         if player1.hp == 0:
-            mapArray[-1] = f"___player2 kills their opponent and wins the game!!____"
+            mapArray[no_y+1] = f"___player2 kills their opponent and wins the game!!____"
 
 
 #____________MESSAGES____________
@@ -161,8 +166,9 @@ def welcome(client, no):
 
 def introMessage(client):
     client.send(encodeMessage("------------ SPELREGLER ------------\n"))
-    client.send(encodeMessage("1. Du börjar med 10 enheter livslust.\n"))
-    client.send(encodeMessage("2. Ditt mål är att hålla igång livslusten!\n"))
+    client.send(encodeMessage("1. Du (@) börjar med 10 enheter livslust.\n"))
+    client.send(encodeMessage("2. Ditt mål är att hålla igång livslusten och ha ihjäl din motståndare (@)!\n"))
+    client.send(encodeMessage("3. Det finns coola grejor (?) att plocka upp på marken.\n"))
     time.sleep(1)
     client.send(encodeMessage("Spelet startar om: \n"))
     client.send(encodeMessage("3\n"))
@@ -194,18 +200,18 @@ def threaded(c, player):
             break
         data = data.decode(encoding='UTF-8') #up, down, left, right
         player.move(data)
-        print("sendflag truee")
+        #print("sendflag truee")
         sendFlag = True #när flyttat, hissa upp flaggan och säg åt tredje tråden att skicka till båda spelarna
         #göra någonting med datan här
         
     c.close()    
 
 def sendThread(c1, c2):
-    print("har lyckats starta skicka tråden")
+    #print("har lyckats starta skicka tråden")
     while True:
         global sendFlag
         if sendFlag:
-            print("nu ska jag skicka")
+            #print("nu ska jag skicka")
             y = str(mapArray)
             c1.send(y.encode(encoding='UTF-8', errors='replace'))
             c2.send(y.encode(encoding='UTF-8', errors='replace'))

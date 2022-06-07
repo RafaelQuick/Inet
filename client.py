@@ -33,7 +33,7 @@ def main():
     connected = False
     for i in range(100):
         try:
-            s.connect(('192.168.1.126', port))
+            s.connect(('192.168.0.102', port)) # Raffe: 192.168.0.102      Nima: 192.168.1.126
             connected = True
             break
         except Exception as e:
