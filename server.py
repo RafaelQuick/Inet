@@ -138,18 +138,23 @@ def displace(player, min_dist, max_dist):
         player.move(direction)
 
 def combat(attacker_no):
+    global mapArray
     if attacker_no == 1:
         player2.hp -= player1.atk
         mapArray[no_y+1] = f"player1 attacks player2 for {player1.atk} damage!"
         mapArray[no_y] = f"Player 1: {player1.hp} hp        Player 2: {player2.hp} hp"
         if player2.hp == 0:
             mapArray[no_y+1] = f"___player1 kills their opponent and wins the game!!____"
+            time.sleep(2)
+            mapArray = "exit"
     else:
         player1.hp -= player2.atk
         mapArray[no_y+1] = f"player2 attacks player1 for {player2.atk} damage!"
         mapArray[no_y] = f"Player 1: {player1.hp} hp        Player 2: {player2.hp} hp"
         if player1.hp == 0:
             mapArray[no_y+1] = f"___player2 kills their opponent and wins the game!!____"
+            time.sleep(2)
+            mapArray = "exit"
 
 
 #____________MESSAGES____________
@@ -176,7 +181,8 @@ def introMessage(client):
     time.sleep(1)
     client.send(encodeMessage("1\n"))
     time.sleep(1)
-    client.send(encodeMessage("Tryck på en av piltangenterna för att börja")) #startsignal att gå vidare till klientens logik
+    client.send(encodeMessage("Tryck på en av piltangenterna för att börja\n"))
+    client.send(encodeMessage("ready")) # startsignal att gå vidare till klientens logik
     time.sleep(0.2)
 
 def flagSet():
@@ -188,7 +194,7 @@ def threaded(c, player):
     global sendFlag
     global stopFlag
     while True:
-        data = c.recv(16384) #servern väntar på att få något
+        data = c.recv(16384) # servern väntar på att få något
         if (not data) or stopFlag or (data == "quit"):
             print('Bye')
             stopFlag = True
@@ -197,11 +203,11 @@ def threaded(c, player):
             print_lock2.release()
             print_lock3.release()
             break
-        data = data.decode(encoding='UTF-8') #up, down, left, right
+        data = data.decode(encoding='UTF-8') # up, down, left, right
         player.move(data)
         #print("sendflag truee")
-        sendFlag = True #när flyttat, hissa upp flaggan och säg åt tredje tråden att skicka till båda spelarna
-        #göra någonting med datan här
+        sendFlag = True # när flyttat, hissa upp flaggan och säg åt tredje tråden att skicka till båda spelarna
+        # göra någonting med datan här
         
     c.close()    
 
@@ -251,10 +257,10 @@ def main():
         player1 = createPlayer(1)
         player2 = createPlayer(2)
         print_lock3.acquire()
-        start_new_thread(threaded, (c, player1))
+        start_new_thread(threaded, (c, player1)) # klienterna har varsin tråd
         start_new_thread(threaded, (c2, player2))
-        start_new_thread(sendThread, (c, c2)) #tråd 3 för skickandet
-        #c.send("whats up bitch".encode(encoding='UTF-8', errors='replace')) #om error på karaktär ersätt med frågetecken
+        start_new_thread(sendThread, (c, c2)) # tråd 3 för skickandet
+        #c.send("whats up bitch".encode(encoding='UTF-8', errors='replace')) # om error på karaktär ersätt med frågetecken
 
     s.close()
         
