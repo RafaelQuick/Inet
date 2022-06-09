@@ -3,7 +3,6 @@ import socket
 from _thread import *
 import threading
 import random
-from turtle import left, right
 import time
 print_lock = threading.Lock()
 print_lock2 = threading.Lock()
@@ -78,7 +77,6 @@ def genCoords():
     while emptySpot == False:
         x = random.randrange(1,(no_x-2))
         y = random.randrange(1,(no_y-2))
-        print(str(x) + " " + str(y))
         if mapArray[y][x] == " ":
             emptySpot = True
     return x, y
@@ -169,6 +167,7 @@ def introMessage(client):
     client.send(encodeMessage("1. Du (@) börjar med 10 enheter livslust.\n"))
     client.send(encodeMessage("2. Ditt mål är att hålla igång livslusten och ha ihjäl din motståndare (@)!\n"))
     client.send(encodeMessage("3. Det finns coola grejor (?) att plocka upp på marken.\n"))
+    client.send(encodeMessage("4. Använt piltangenterna för att flytta på dig!\n"))
     time.sleep(1)
     client.send(encodeMessage("Spelet startar om: \n"))
     client.send(encodeMessage("3\n"))
@@ -177,7 +176,7 @@ def introMessage(client):
     time.sleep(1)
     client.send(encodeMessage("1\n"))
     time.sleep(1)
-    client.send(encodeMessage("ready")) #startsignal att gå vidare till klientens logik
+    client.send(encodeMessage("Tryck på en av piltangenterna för att börja")) #startsignal att gå vidare till klientens logik
     time.sleep(0.2)
 
 def flagSet():
