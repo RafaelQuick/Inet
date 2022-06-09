@@ -42,7 +42,7 @@ def main():
             connected = True
             break
         except:
-            time.sleep(0.5) # provar ansluta under en 20 sekunders period annars timeout
+            time.sleep(1) # provar ansluta under en 20 sekunders period annars timeout
     if not connected:
         exit("Kunde inte hitta koppling till servern") #från sys modulen # more like sus modulen amirite
     print("Connected till host host")
