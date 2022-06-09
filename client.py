@@ -31,39 +31,45 @@ def main():
     print("Väntar på anslutning")
     connected = False
     for i in range(21):
+
         # printar om var 5:e sekund
-        
         if i == 5 or i == 10 or i == 15: 
-            print("Väntar på anslutning")
+            print(f"Väntar på anslutning, väntar {20-i} sekunder till")
         
         elif i == 19:
             print("Kunde inte hitta koppling till servern")
         elif i == 20:
             exit("Kunde inte hitta koppling till servern") #från sys modulen # more like sus modulen amirite
         try:
-            s.connect(('172.17.1.22', port)) # Raffe: 192.168.0.102 | Nima: 192.168.1.126 | Fredrika: 172.17.1.22
+            s.connect(('192.168.0.102', port)) # Raffe: 192.168.0.102 | Nima: 192.168.1.126 | Fredrika: 172.17.1.22
             connected = True
             break
         except:
             time.sleep(1) # provar ansluta under en 20 sekunders period annars timeout
-    print("Connected till host host")
+    print("Connected to host host")
     introPhase(s)
     genHotkeys(s)
     while True:
         data = s.recv(16384)
         data = data.decode(encoding='UTF-8')
+        if "exit" in data:
+            time.sleep(1)
+            data = data.strip("exit from")
+            s.close()
+            print(data + " lost connection.")
+            break
         lista = eval(data)
         #if name == 'nt':
         #    system('CLS')
         #else:
         #    system('clear')
+        system('clear')
         for row in lista:
             newRow = ""
             for char in row:
                 newRow += char
             print(newRow)
-        if data == "exit":
-            s.close()
+        
     
 main()
 
