@@ -13,14 +13,14 @@ stopFlag = False
 #____________GAME LOGIC____________
 class Player:
     def __init__(self, no, x, y, hp, atk):
-        self.no = no
-        self.x = x
+        self.no = no # håller reda på om man är spelare 1 eller 2
+        self.x = x # x och y randomgenereras i början
         self.y = y
         self.hp = hp
         self.atk = atk
 
     def move(self, direction):
-        seed = random.randint(0, 40) # occasionally places a new powerup
+        seed = random.randint(0, 40) # placerar ut en ny powerup då och då när någon tar ett steg
         if seed == 0:
             placePowerups(1)
         oldX = self.x
@@ -28,6 +28,7 @@ class Player:
         newX = self.x
         newY = self.y
 
+        # ändrar koordinaten beroende på vilken riktning man går i
         if direction == "up":
             newY -= 1
         elif direction == "down":
@@ -37,10 +38,13 @@ class Player:
         elif direction == "left":
             newX -= 1
         
+        # kollar först vart vi är på väg, hanterar destinationen olika
         newSquare = checkSquare(newX, newY)
         if newSquare == "wall":
             return
         elif newSquare == "floor":
+            # skriver om nya koordinaterna till att vara en spelare
+            # gamla koordinaterna blir nu tom mark
             mapArray[newY][newX] = "@"
             mapArray[oldY][oldX] = " "
             self.x = newX
@@ -52,29 +56,32 @@ class Player:
             self.y = newY
             powerup(self)
         elif newSquare == "player":
+            # man kan inte gå in i varandra ;^)
             combat(self.no)
             return
 
 
-#koordinater skrivs mapArray[y][x]
-
 def genMap():
+    # koordinater skrivs mapArray[y][x]
     global mapArray
     mapArray = []
     innerMapArray = []
     for y in range(no_y):
         for x in range(no_x):
+            # sätter ut väggar runt kanten, tom mark annars
             if x == 0 or y == 0 or x == (no_x-1) or y == (no_y-1):
                 innerMapArray.append("#")
             else:
                 innerMapArray.append(" ")
         mapArray.append(innerMapArray)
         innerMapArray = []
+    # under spelplanen finns spelarnas hp. sista raden berätter det senaste som hänt i spelet
     mapArray.append(f"Player 1: {10} hp        Player 2: {10} hp")
     mapArray.append("")
     
 
 def genCoords():
+    # plockar fram en random tom ruta, används lite här och där
     emptySpot = False
     while emptySpot == False:
         x = random.randrange(1,(no_x-2))
@@ -83,18 +90,22 @@ def genCoords():
             emptySpot = True
     return x, y
 
+
 def placePowerups(number):    
     for i in range(number):
         x, y = genCoords()
         mapArray[y][x] = "?"
-        
+
+
 def createPlayer(no):
     x, y = genCoords()
     player = Player(no, x, y, 10, 1)
     mapArray[y][x] = "@"
     return player
 
+
 def checkSquare(x, y):
+    # kollar vad som finns på ett givet koordinatpar
     try:
         if mapArray[y][x] == "#":
             return "wall"
@@ -108,28 +119,35 @@ def checkSquare(x, y):
         print(x, y)
         print(mapArray)
 
+
 def powerup(player):
-    seed = random.randint(0, 100)
-    if seed < 40: # attack boost, 40% chance
+    seed = random.randint(0, 100) # för att kunna ha olika viktade chanser
+    if seed < 40: # attack boost, 40% chans
         atkBoost = random.randint(1,4)
         player.atk += atkBoost
         msg = f"Player {str(player.no)} feels {str(atkBoost)} muscles stronger!"
-    elif seed >= 40 and seed < 60: # health boost, 20% chance
+
+    elif seed >= 40 and seed < 60: # helar hp, 20% chans
         if player.hp <= 7:
             player.hp += 3
         else: 
             player.hp = 10
         msg = f"Player {str(player.no)} chugs some good health juice!"
-    elif seed >= 60 and seed < 70: # self harm, 10% chance
+
+    elif seed >= 60 and seed < 70: # self harm, 10% chans
         player.hp -= 1
         msg = f"Player {str(player.no)} stubs their toe..."
-    elif seed >= 70: # moves the player a random distance in a random direction, 30% chance
+
+    elif seed >= 70: # flyttar spelaren ett random avstånd i en random riktning , 30% chans
         displace(player, 2, 6)
         msg = f"Player {str(player.no)} has been displaced!"
+    # uppdaterar hp-display och infodisplay    
     mapArray[no_y] = f"Player 1: {player1.hp} hp        Player 2: {player2.hp} hp"
     mapArray[no_y+1] = msg
 
+
 def displace(player, min_dist, max_dist):
+    # plockar en random riktning och flyttar spelaren inom ett avståndsrange
     directionSeed = random.randint(0, 3)
     distanceSeed = random.randint(min_dist, max_dist)
     if directionSeed == 0:
@@ -137,33 +155,36 @@ def displace(player, min_dist, max_dist):
     elif directionSeed == 1:
         direction = "down"
     elif directionSeed == 2:
-        direction = "left"
-    elif directionSeed == 3:
         direction = "right"
+    elif directionSeed == 3:
+        direction = "left"
     for i in range(distanceSeed):
         player.move(direction)
 
+
 def combat(attacker_no):
+    # hanterar global konflikt, som i Supremacy 1914
     global mapArray
     global stopFlag
-    if attacker_no == 1: # checks who is making the attack
-        player2.hp -= player1.atk # decreases other players health
-        mapArray[no_y] = f"Player 1: {player1.hp} hp        Player 2: {player2.hp} hp" # updates healthbars
-        mapArray[no_y+1] = f"player1 attacks player2 for {player1.atk} damage!" # tells players what happened
 
-        if player2.hp <= 0: # handles player death
-            mapArray[no_y+1] = f"___player1 kills their opponent and wins the game!!____"
+    if attacker_no == 1: # kollar vem som initierat attacken
+        player2.hp -= player1.atk # minskar andra spelarens hp
+        mapArray[no_y] = f"Player 1: {player1.hp} hp        Player 2: {player2.hp} hp" # uppdaterar hp-display
+        mapArray[no_y+1] = f"player1 attacks player2 for {player1.atk} damage!" # uppdaterar infodisplay
+
+        if player2.hp <= 0: # hanterar döden (5 steg)
+            mapArray[no_y+1] = f"----player1 kills their opponent and wins the game!!----"
             time.sleep(2)
-            mapArray = "exit" # sends exit message to clients
+            mapArray = "exit" # skickar exit-meddelande till klienterna
             stopFlag = True
-
+    # samma skit för spelare 2
     else:
         player1.hp -= player2.atk
         mapArray[no_y] = f"Player 1: {player1.hp} hp        Player 2: {player2.hp} hp"
         mapArray[no_y+1] = f"player2 attacks player1 for {player2.atk} damage!"
         
         if player1.hp <= 0:
-            mapArray[no_y+1] = f"___player2 kills their opponent and wins the game!!____"
+            mapArray[no_y+1] = f"----player2 kills their opponent and wins the game!!----"
             time.sleep(2)
             mapArray = "exit"
             stopFlag = True
@@ -174,63 +195,61 @@ def combat(attacker_no):
 def encodeMessage(message):
     return message.encode(encoding='UTF-8', errors='replace')
 
+
 def welcome(client, no):
     no = str(no)
-    message = "Välkommen spelare " + no + "\n"
+    message = "Welcome player " + no + "\n"
     client.send(message.encode(encoding='UTF-8', errors='replace'))
 
+
 def introMessage(client):
-    client.send(encodeMessage("------------ SPELREGLER ------------\n"))
+    client.send(encodeMessage("------------ Game Rules ------------\n"))
     time.sleep(1)
-    client.send(encodeMessage("1. Du (@) börjar med 10 enheter livslust.\n"))
+    client.send(encodeMessage("1. You (@) start with 10 hitpoints.\n"))
     time.sleep(1)
-    client.send(encodeMessage("2. Ditt mål är att hålla igång livslusten och ha ihjäl din motståndare (@)!\n"))
+    client.send(encodeMessage("2. Your goal is to stay alive and kill your opponent (@) !\n"))
     time.sleep(1)
-    client.send(encodeMessage("3. Det finns coola grejor (?) att plocka upp på marken.\n"))
+    client.send(encodeMessage("3. There are cool powerups (?) on the ground, just walk into them.\n"))
     time.sleep(1)
-    client.send(encodeMessage("4. Använt piltangenterna för att flytta på dig!\n"))
+    client.send(encodeMessage("4. Use the arrow keys to move!\n"))
     time.sleep(1)
-    client.send(encodeMessage("Tryck på en av piltangenterna för att börja\n"))
+    client.send(encodeMessage("Press any arrow key to begin.\n"))
     client.send(encodeMessage("ready")) # startsignal att gå vidare till klientens logik
     time.sleep(0.2)
 
 
 #____________SERVER LOGIC____________
 def threaded(c, player):
+    # tråd som tar emot data från EN (1) klient, och säger när vi kan skicka data till klienterna
     introMessage(c)
     global sendFlag
     global stopFlag
     while True:
         try:
             if stopFlag:
-                c.send(encodeMessage(f"exit from player {str(player.no)}")) #ser till att skicka till båda
+                c.send(encodeMessage(f"exit from player {str(player.no)}")) # skickar stoppsignal till klienterna
                 stopFlag = True
                 # lock released on exit
                 c.close()
                 return
                 
-                
             data = c.recv(16384) # servern väntar på att få något
             data = data.decode(encoding='UTF-8') # up, down, left, right
             if not stopFlag:
-                player.move(data) # för att inte råka göra en player move mellan då trådarna håller på att stängas
-            #print("sendflag truee")
-            sendFlag = True # när flyttat, hissa upp flaggan och säg åt tredje tråden att skicka till båda spelarna
-            # göra någonting med datan här
+                player.move(data) # vill inte move när vi ska avsluta
+            sendFlag = True # hissa upp sendFlag vilket säger åt tredje tråden att göra sin grej (se nedan)
+
         except ConnectionResetError:
             stopFlag = True
-            # lock released on exit
             c.close()
             return
-
         
 
 def sendThread(c1, c2):
-    #print("har lyckats starta skicka tråden")
+    # tråd som skickar spelplanen till klienterna när sendFlag hissas
     while True:
         global sendFlag
         if sendFlag:
-            #print("nu ska jag skicka")
             y = str(mapArray)
             c1.send(y.encode(encoding='UTF-8', errors='replace'))
             c2.send(y.encode(encoding='UTF-8', errors='replace'))
@@ -246,44 +265,45 @@ def main():
         port = 12345
         s.bind(('', port))
     except socket.error:
-        print("nej det blev fel :(")
+        print("Socket error")
 
     try:
         s.listen(5)
         print("Server started!")
     except:
-        print("Abonenten du försöker nå, kan inte TA ditt samtal just nu.")
+        print("Server failed connection")
     while True:
         stopFlag = False
         sendFlag = False
         genMap()
         placePowerups(3)
+        # skapa spelarobjekten som ska skickas med trådarna
         global player1
         global player2
         player1 = createPlayer(1)
         player2 = createPlayer(2)
         c, addr = s.accept()
-        print("Fick anslutning från", addr, ", spelare 1 ")
+
+        print("Player one has connected from ", addr)
+        # skapa tråd 1 och 2 för att ta emot input från varsin klient
         t1 = threading.Thread(target=threaded, args=[c, player1])
         welcome(c, 1)
-        c.send(encodeMessage("Väntar på spelare 2"))
+        c.send(encodeMessage("Waiting for player 2"))
         c2, addr2 = s.accept()
         t2 = threading.Thread(target=threaded, args=[c2, player2])
-        print("Fick anslutning från", addr2, ", spelare 2 ")
+        print("Player two has connected from ", addr)
         welcome(c2, 2)
-        c.send(encodeMessage("Spelare 2 är nu ansluten redo att starta"))
-        #skapa spelarobjekten här innan trådarna
+        c.send(encodeMessage("Player 2 is now connected and ready to play!"))
+        # tråd 3 hanterar skickande av data till klienterna
         t3 = threading.Thread(target=sendThread, args=[c, c2])
+
         t1.start()
         t2.start()
         t3.start()
+        # joinar trådarna så att de avslutas samtidigt
         t1.join()
         t2.join()
         t3.join()
-        #start_new_thread(threaded, (c, player1)) # klienterna har varsin tråd
-        #start_new_thread(threaded, (c2, player2))
-        #start_new_thread(sendThread, (c, c2)) # tråd 3 för skickandet
-        print("Klienterna har avanslutits, väntar på nya klienter")
-        #c.send("whats up bitch".encode(encoding='UTF-8', errors='replace')) # om error på karaktär ersätt med frågetecken
-        
+        # vi kommer bara hit när trådarna avslutas
+        print("Both clients have disconnected, waiting for new connections...")       
 main()

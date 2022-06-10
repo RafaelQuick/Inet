@@ -28,20 +28,20 @@ def introPhase(s):
 def main():
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     port = 12345
-    print("Väntar på anslutning")
+    print("Waiting for connection")
     connected = False
     for i in range(21):
 
         # printar om var 5:e sekund
         if i == 5 or i == 10 or i == 15: 
-            print(f"Väntar på anslutning, väntar {20-i} sekunder till")
+            print(f"Waiting for connection, waiting for {20-i} more seconds")
         
         elif i == 19:
-            print("Kunde inte hitta koppling till servern")
+            print("Couldn't connect to the server, shutting down")
         elif i == 20:
-            exit("Kunde inte hitta koppling till servern") #från sys modulen # more like sus modulen amirite
+            exit() #från sys modulen # more like sus modulen amirite
         try:
-            s.connect(('192.168.0.102', port)) # Raffe: 192.168.0.102 | Nima: 192.168.1.126 | Fredrika: 172.17.1.22
+            s.connect(('172.17.1.22', port)) # Raffe: 192.168.0.102 | Nima: 192.168.1.126 | Fredrika: 172.17.1.22
             connected = True
             break
         except:
